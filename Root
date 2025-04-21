@@ -1,0 +1,159 @@
+# Nikhil-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Car Racing - www.game.com</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #111;
+      color: #fff;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+
+    #gameArea {
+      position: relative;
+      width: 400px;
+      height: 600px;
+      margin: 20px auto;
+      background: #333;
+      overflow: hidden;
+      border: 5px solid #fff;
+    }
+
+    .line {
+      position: absolute;
+      width: 10px;
+      height: 80px;
+      background: white;
+      left: 195px;
+      animation: moveLine 2s linear infinite;
+    }
+
+    @keyframes moveLine {
+      0% { top: -100px; }
+      100% { top: 700px; }
+    }
+
+    .car {
+      width: 50px;
+      height: 100px;
+      position: absolute;
+      bottom: 10px;
+      left: 175px;
+      background: red;
+      border-radius: 5px;
+    }
+
+    .enemy {
+      width: 50px;
+      height: 100px;
+      position: absolute;
+      background: yellow;
+      top: -120px;
+      animation: moveEnemy 2s linear infinite;
+    }
+
+    @keyframes moveEnemy {
+      0% { top: -120px; }
+      100% { top: 700px; }
+    }
+
+    #score {
+      text-align: center;
+      font-size: 24px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">www.game.com - Car Racing</h1>
+  <div id="score">Score: 0</div>
+  <div id="gameArea">
+    <div class="car" id="playerCar"></div>
+  </div>
+
+  <script>
+    const gameArea = document.getElementById('gameArea');
+    const playerCar = document.getElementById('playerCar');
+    const scoreEl = document.getElementById('score');
+
+    let gameInterval;
+    let score = 0;
+    let speed = 5;
+    let gameRunning = true;
+
+    document.addEventListener('keydown', moveCar);
+
+    function moveCar(e) {
+      const left = parseInt(window.getComputedStyle(playerCar).getPropertyValue("left"));
+      if (e.key === "ArrowLeft" && left > 0) {
+        playerCar.style.left = `${left - 25}px`;
+      } else if (e.key === "ArrowRight" && left < 350) {
+        playerCar.style.left = `${left + 25}px`;
+      }
+    }
+
+    function createEnemy() {
+      const enemy = document.createElement("div");
+      enemy.classList.add("enemy");
+      enemy.style.left = `${Math.floor(Math.random() * 7) * 50}px`;
+      gameArea.appendChild(enemy);
+
+      const move = setInterval(() => {
+        const top = parseInt(window.getComputedStyle(enemy).getPropertyValue("top"));
+        if (top >= 600) {
+          clearInterval(move);
+          enemy.remove();
+          if (gameRunning) {
+            score++;
+            scoreEl.textContent = `Score: ${score}`;
+          }
+        } else {
+          enemy.style.top = `${top + speed}px`;
+
+          // Collision Detection
+          const carLeft = parseInt(window.getComputedStyle(playerCar).getPropertyValue("left"));
+          const carTop = parseInt(window.getComputedStyle(playerCar).getPropertyValue("top")) || 500;
+
+          const enemyLeft = parseInt(enemy.style.left);
+          const enemyTop = parseInt(enemy.style.top);
+
+          if (
+            enemyTop + 100 > carTop &&
+            enemyTop < carTop + 100 &&
+            enemyLeft < carLeft + 50 &&
+            enemyLeft + 50 > carLeft
+          ) {
+            gameRunning = false;
+            alert(`Game Over! Final Score: ${score}`);
+            location.reload();
+          }
+        }
+      }, 30);
+    }
+
+    // Draw lines
+    for (let i = 0; i < 5; i++) {
+      const line = document.createElement('div');
+      line.classList.add('line');
+      line.style.top = `${i * 120}px`;
+      gameArea.appendChild(line);
+    }
+
+    gameInterval = setInterval(() => {
+      if (gameRunning) {
+        createEnemy();
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
